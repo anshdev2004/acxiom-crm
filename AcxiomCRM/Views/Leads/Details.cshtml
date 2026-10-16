@@ -1,0 +1,195 @@
+@model AcxiomCRM.ViewModels.LeadDetailsViewModel
+@{
+    ViewData["Title"] = $"{Model.Lead.LeadName} - Lead Details";
+}
+
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
+    <div>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-1 small">
+                <li class="breadcrumb-item"><a asp-action="Index">Leads</a></li>
+                <li class="breadcrumb-item active" aria-current="page">@Model.Lead.LeadCode</li>
+            </ol>
+        </nav>
+        <h3 class="fw-bold mb-0">
+            @Model.Lead.LeadName
+            <span class="badge @(Model.Lead.Status == "Converted" ? "bg-purple text-white" : Model.Lead.Status == "Qualified" ? "bg-success" : "bg-primary") fs-6 ms-2" style="@(Model.Lead.Status == "Converted" ? "background-color: #8b5cf6;" : "")">
+                @Model.Lead.Status
+            </span>
+        </h3>
+    </div>
+    <div class="d-flex gap-2 mt-2 mt-md-0">
+        @if (Model.Lead.Status != LeadStatuses.Converted)
+        {
+            <a asp-action="Convert" asp-route-id="@Model.Lead.LeadId" class="btn btn-success btn-sm">
+                <i class="bi bi-arrow-repeat me-1"></i> Convert to Customer
+            </a>
+            <a asp-action="Edit" asp-route-id="@Model.Lead.LeadId" class="btn btn-outline-primary btn-sm">
+                <i class="bi bi-pencil me-1"></i> Edit Lead
+            </a>
+        }
+        else
+        {
+            <a asp-controller="Customers" asp-action="Details" asp-route-id="@Model.Lead.ConvertedCustomerId" class="btn btn-primary btn-sm">
+                <i class="bi bi-box-arrow-up-right me-1"></i> View Converted Customer
+            </a>
+        }
+        <a asp-controller="FollowUps" asp-action="Create" asp-route-leadId="@Model.Lead.LeadId" class="btn btn-warning text-dark btn-sm">
+            <i class="bi bi-calendar-plus me-1"></i> Follow-Up
+        </a>
+        <a asp-controller="Activities" asp-action="Create" asp-route-leadId="@Model.Lead.LeadId" class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-clock-history me-1"></i> Activity
+        </a>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Lead Profile Card -->
+    <div class="col-lg-4">
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-white py-3 border-0">
+                <h6 class="fw-bold mb-0"><i class="bi bi-funnel text-info me-2"></i> Lead Master Details</h6>
+            </div>
+            <div class="card-body pt-0">
+                <ul class="list-group list-group-flush small">
+                    <li class="list-group-item d-flex justify-content-between px-0">
+                        <span class="text-muted">Lead Code:</span>
+                        <span class="fw-monospace fw-bold">@Model.Lead.LeadCode</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between px-0">
+                        <span class="text-muted">Company:</span>
+                        <span class="fw-semibold">@(Model.Lead.CompanyName ?? "—")</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between px-0">
+                        <span class="text-muted">Email:</span>
+                        <span><a href="mailto:@Model.Lead.Email" class="text-decoration-none">@Model.Lead.Email</a></span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between px-0">
+                        <span class="text-muted">Phone:</span>
+                        <span>@Model.Lead.Phone</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between px-0">
+                        <span class="text-muted">Lead Source:</span>
+                        <span class="badge bg-light text-dark border">@Model.Lead.Source</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between px-0">
+                        <span class="text-muted">Priority:</span>
+                        <span class="badge @(Model.Lead.Priority == "High" || Model.Lead.Priority == "Critical" ? "bg-danger" : "bg-secondary")">
+                            @Model.Lead.Priority
+                        </span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between px-0">
+                        <span class="text-muted">Expected Value:</span>
+                        <span class="fw-bold text-success">$@Model.Lead.ExpectedValue.ToString("N2")</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between px-0">
+                        <span class="text-muted">Assigned Rep:</span>
+                        <span>@(Model.Lead.AssignedUser?.FullName ?? "Unassigned")</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between px-0">
+                        <span class="text-muted">Captured Date:</span>
+                        <span>@Model.Lead.CreatedDate.ToString("yyyy-MM-dd HH:mm")</span>
+                    </li>
+                    @if (Model.Lead.ConversionDate.HasValue)
+                    {
+                        <li class="list-group-item d-flex justify-content-between px-0 bg-light p-2 rounded">
+                            <span class="text-success fw-bold">Converted Date:</span>
+                            <span class="fw-bold">@Model.Lead.ConversionDate.Value.ToString("yyyy-MM-dd")</span>
+                        </li>
+                    }
+                </ul>
+
+                @if (!string.IsNullOrEmpty(Model.Lead.Notes))
+                {
+                    <div class="mt-3">
+                        <span class="fw-semibold small d-block mb-1">Prospect Notes:</span>
+                        <p class="small text-muted bg-light p-2 rounded mb-0">@Model.Lead.Notes</p>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- Related Follow-Ups and Activities -->
+    <div class="col-lg-8">
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-white py-3 border-0">
+                <h6 class="fw-bold mb-0"><i class="bi bi-calendar-check text-warning me-2"></i> Scheduled Follow-Ups (@Model.FollowUps.Count)</h6>
+            </div>
+            <div class="card-body p-0">
+                @if (Model.FollowUps.Any())
+                {
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light small">
+                                <tr>
+                                    <th>Subject</th>
+                                    <th>Type</th>
+                                    <th>Date</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var f in Model.FollowUps)
+                                {
+                                    <tr>
+                                        <td class="fw-semibold">@f.Subject</td>
+                                        <td><span class="badge bg-light text-dark border">@f.FollowUpType</span></td>
+                                        <td class="small">@f.FollowUpDate.ToString("yyyy-MM-dd HH:mm")</td>
+                                        <td><span class="badge bg-secondary">@f.Status</span></td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+                else
+                {
+                    <div class="p-4 text-center text-muted small">
+                        No follow-ups scheduled for this lead.
+                    </div>
+                }
+            </div>
+        </div>
+
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-white py-3 border-0">
+                <h6 class="fw-bold mb-0"><i class="bi bi-clock-history text-primary me-2"></i> Lead Activities & Touchpoints (@Model.Activities.Count)</h6>
+            </div>
+            <div class="card-body p-0">
+                @if (Model.Activities.Any())
+                {
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light small">
+                                <tr>
+                                    <th>Type</th>
+                                    <th>Subject</th>
+                                    <th>Date</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var a in Model.Activities)
+                                {
+                                    <tr>
+                                        <td><span class="badge bg-info text-dark">@a.ActivityType</span></td>
+                                        <td class="small fw-semibold">@a.Subject</td>
+                                        <td class="small text-muted">@a.ActivityDate.ToString("yyyy-MM-dd HH:mm")</td>
+                                        <td><span class="badge bg-light text-dark border">@a.Status</span></td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+                else
+                {
+                    <div class="p-4 text-center text-muted small">
+                        No activities logged for this lead.
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>

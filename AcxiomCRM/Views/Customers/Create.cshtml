@@ -1,0 +1,105 @@
+@model AcxiomCRM.ViewModels.CustomerEditViewModel
+@{
+    ViewData["Title"] = "Add New Customer";
+}
+
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-2 small">
+                <li class="breadcrumb-item"><a asp-action="Index">Customers</a></li>
+                <li class="breadcrumb-item active" aria-current="page">New Customer</li>
+            </ol>
+        </nav>
+
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-white py-3 border-0">
+                <h4 class="fw-bold mb-0"><i class="bi bi-person-plus-fill text-primary me-2"></i> Add New Customer</h4>
+                <span class="text-muted small">Capture customer master data with duplicate prevention</span>
+            </div>
+            <div class="card-body p-4 pt-2">
+                <form asp-action="Create" method="post" novalidate>
+                    @Html.AntiForgeryToken()
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2 small" role="alert"></div>
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label asp-for="CustomerName" class="form-label fw-semibold small">Customer / Contact Name <span class="text-danger">*</span></label>
+                            <input asp-for="CustomerName" class="form-control" placeholder="Acme Inc. / John Smith" autofocus />
+                            <span asp-validation-for="CustomerName"></span>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label asp-for="CompanyName" class="form-label fw-semibold small">Company Name</label>
+                            <input asp-for="CompanyName" class="form-control" placeholder="Acme Corporation" />
+                            <span asp-validation-for="CompanyName"></span>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label asp-for="Email" class="form-label fw-semibold small">Email Address <span class="text-danger">*</span></label>
+                            <input asp-for="Email" class="form-control" placeholder="contact@acme.com" />
+                            <span asp-validation-for="Email"></span>
+                            <div class="form-text small">Must be unique across customer records.</div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label asp-for="Phone" class="form-label fw-semibold small">Phone Number <span class="text-danger">*</span></label>
+                            <input asp-for="Phone" class="form-control" placeholder="+1-555-1234" />
+                            <span asp-validation-for="Phone"></span>
+                            <div class="form-text small">Must be a valid 7 to 20 digit phone format.</div>
+                        </div>
+
+                        <div class="col-12">
+                            <label asp-for="Address" class="form-label fw-semibold small">Street Address</label>
+                            <input asp-for="Address" class="form-control" placeholder="123 Business Boulevard, Suite 400" />
+                            <span asp-validation-for="Address"></span>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label asp-for="City" class="form-label fw-semibold small">City</label>
+                            <input asp-for="City" class="form-control" placeholder="Seattle" />
+                            <span asp-validation-for="City"></span>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label asp-for="State" class="form-label fw-semibold small">State / Province</label>
+                            <input asp-for="State" class="form-control" placeholder="Washington" />
+                            <span asp-validation-for="State"></span>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label asp-for="Status" class="form-label fw-semibold small">Customer Status</label>
+                            <select asp-for="Status" class="form-select">
+                                <option value="Active">Active</option>
+                                <option value="Inactive">Inactive</option>
+                            </select>
+                            <span asp-validation-for="Status"></span>
+                        </div>
+
+                        @if (Model.AvailableOwners.Any())
+                        {
+                            <div class="col-md-6">
+                                <label asp-for="OwnerId" class="form-label fw-semibold small">Assign Sales Representative</label>
+                                <select asp-for="OwnerId" asp-items="Model.AvailableOwners" class="form-select">
+                                    <option value="">-- Assign to Me --</option>
+                                </select>
+                                <span asp-validation-for="OwnerId"></span>
+                            </div>
+                        }
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-2 mt-4 pt-2 border-top">
+                        <a asp-action="Index" class="btn btn-outline-secondary">Cancel</a>
+                        <button type="submit" class="btn btn-primary px-4 fw-semibold">
+                            <i class="bi bi-check-lg me-1"></i> Save Customer
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

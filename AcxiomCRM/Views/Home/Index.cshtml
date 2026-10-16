@@ -1,0 +1,149 @@
+@{
+    ViewData["Title"] = "Welcome to AcxiomCRM";
+}
+
+<div class="row align-items-center py-5">
+    <div class="col-lg-7">
+        <span class="badge bg-primary bg-opacity-10 text-primary px-3 py-2 rounded-pill fw-semibold mb-3">
+            <i class="bi bi-mortarboard-fill me-1"></i> College Assignment Project &bull; Production Standards
+        </span>
+        <h1 class="display-4 fw-bold text-dark lh-tight mb-3">
+            Enterprise Sales & Relationship Management with <span class="text-primary">AcxiomCRM</span>
+        </h1>
+        <p class="lead text-muted mb-4">
+            A comprehensive, role-scoped CRM application covering the customer-sales lifecycle from lead capture, qualification, and transactional conversion to pipeline forecasting, follow-ups, and auditability.
+        </p>
+
+        <div class="d-flex flex-wrap gap-3 mb-5">
+            <a asp-controller="Account" asp-action="Login" class="btn btn-primary btn-lg px-4 shadow-sm fw-semibold">
+                <i class="bi bi-box-arrow-in-right me-2"></i> Launch Application Login
+            </a>
+            <a asp-controller="Account" asp-action="Register" class="btn btn-outline-secondary btn-lg px-4 fw-semibold">
+                <i class="bi bi-person-plus me-2"></i> Register Sales Account
+            </a>
+        </div>
+
+        <div class="row g-3">
+            <div class="col-sm-4">
+                <div class="d-flex align-items-center">
+                    <i class="bi bi-shield-lock text-success fs-3 me-2"></i>
+                    <div>
+                        <div class="fw-bold small">ASP.NET Identity</div>
+                        <div class="text-muted small">PBKDF2 & Lockout</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-4">
+                <div class="d-flex align-items-center">
+                    <i class="bi bi-database-check text-primary fs-3 me-2"></i>
+                    <div>
+                        <div class="fw-bold small">EF Core Relational</div>
+                        <div class="text-muted small">SQL Server & Sqlite</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-4">
+                <div class="d-flex align-items-center">
+                    <i class="bi bi-pie-chart text-warning fs-3 me-2"></i>
+                    <div>
+                        <div class="fw-bold small">Chart.js Analytics</div>
+                        <div class="text-muted small">Real-time Visuals</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Demonstration Roles & Quick Access Card -->
+    <div class="col-lg-5 mt-4 mt-lg-0">
+        <div class="card shadow border-0 rounded-4 overflow-hidden">
+            <div class="card-header bg-dark text-white p-4 border-0">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h5 class="fw-bold mb-0"><i class="bi bi-key-fill text-warning me-2"></i> Demo Role Credentials</h5>
+                    <span class="badge bg-warning text-dark">Pre-Seeded</span>
+                </div>
+                <p class="small text-muted mb-0 mt-1">Ready for immediate testing and viva demonstration</p>
+            </div>
+            <div class="card-body p-4 bg-light">
+                <!-- Admin Card -->
+                <div class="card border-0 shadow-sm mb-3">
+                    <div class="card-body p-3">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <span class="badge bg-danger">1. Admin Role</span>
+                            <span class="small text-muted">Full CRM & Security Access</span>
+                        </div>
+                        <div class="small mt-1"><strong>Email:</strong> <code>admin@acxiomcrm.local</code></div>
+                        <div class="small"><strong>Password:</strong> <code>Admin@12345!</code></div>
+                    </div>
+                </div>
+
+                <!-- Manager Card -->
+                <div class="card border-0 shadow-sm mb-3">
+                    <div class="card-body p-3">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <span class="badge bg-warning text-dark">2. Manager Role</span>
+                            <span class="small text-muted">Team Scope & Pipeline</span>
+                        </div>
+                        <div class="small mt-1"><strong>Email:</strong> <code>manager@acxiomcrm.local</code></div>
+                        <div class="small"><strong>Password:</strong> <code>Manager@12345!</code></div>
+                    </div>
+                </div>
+
+                <!-- Sales Executive Card -->
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body p-3">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <span class="badge bg-primary">3. Sales Executive</span>
+                            <span class="small text-muted">Personal Owned Records</span>
+                        </div>
+                        <div class="small mt-1"><strong>Email:</strong> <code>sales1@acxiomcrm.local</code></div>
+                        <div class="small"><strong>Password:</strong> <code>Sales@12345!</code></div>
+                    </div>
+                </div>
+
+                <div class="d-grid mt-3">
+                    <a asp-controller="Account" asp-action="Login" class="btn btn-outline-dark fw-semibold">
+                        Sign In with Demo Credentials &rarr;
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Section 17 Core Architecture Architecture Cards -->
+<div class="row g-4 py-4 border-top">
+    <div class="col-md-4">
+        <div class="card shadow-sm border-0 h-100 p-3">
+            <div class="card-body">
+                <i class="bi bi-shield-check text-success fs-2 mb-2 d-block"></i>
+                <h5 class="fw-bold">Security & Authorization</h5>
+                <p class="small text-muted">
+                    Server-enforced row-level data access, anti-forgery protection, lockout after 5 failed attempts, password complexity policy, and sanitized append-only audit logging.
+                </p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card shadow-sm border-0 h-100 p-3">
+            <div class="card-body">
+                <i class="bi bi-arrow-repeat text-primary fs-2 mb-2 d-block"></i>
+                <h5 class="fw-bold">Lead-to-Customer Pipeline</h5>
+                <p class="small text-muted">
+                    Transactional lead conversion preventing duplicate customers, automatic deal creation, probability-based weighted pipeline calculation, and follow-up tracking.
+                </p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card shadow-sm border-0 h-100 p-3">
+            <div class="card-body">
+                <i class="bi bi-braces text-info fs-2 mb-2 d-block"></i>
+                <h5 class="fw-bold">Secured REST APIs</h5>
+                <p class="small text-muted">
+                    Full REST API endpoints for Customers, Leads, Opportunities, and Pipeline Reports using validated DTOs, appropriate HTTP status codes, and JSON error responses.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>

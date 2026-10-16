@@ -1,0 +1,99 @@
+@model AcxiomCRM.ViewModels.FollowUpEditViewModel
+@{
+    ViewData["Title"] = "Schedule Follow-Up";
+}
+
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-2 small">
+                <li class="breadcrumb-item"><a asp-action="Index">Follow-Ups</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Schedule New</li>
+            </ol>
+        </nav>
+
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-white py-3 border-0">
+                <h4 class="fw-bold mb-0 text-warning text-dark"><i class="bi bi-calendar-plus-fill text-warning me-2"></i> Schedule Follow-Up Activity</h4>
+                <span class="text-muted small">Plan future touchpoint commitments across customers, leads, or opportunities</span>
+            </div>
+            <div class="card-body p-4 pt-2">
+                <form asp-action="Create" method="post" novalidate>
+                    @Html.AntiForgeryToken()
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2 small" role="alert"></div>
+
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label asp-for="Subject" class="form-label fw-semibold small">Follow-Up Subject <span class="text-danger">*</span></label>
+                            <input asp-for="Subject" class="form-control" placeholder="e.g. Discuss revised proposal & implementation SLA" autofocus />
+                            <span asp-validation-for="Subject"></span>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label asp-for="FollowUpDate" class="form-label fw-semibold small">Follow-Up Date & Time <span class="text-danger">*</span></label>
+                            <input asp-for="FollowUpDate" class="form-control" type="datetime-local" />
+                            <span asp-validation-for="FollowUpDate"></span>
+                            <div class="form-text small">Mandatory: Planned follow-up date cannot be earlier than today.</div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label asp-for="FollowUpType" class="form-label fw-semibold small">Activity Type <span class="text-danger">*</span></label>
+                            <select asp-for="FollowUpType" asp-items="Model.AvailableTypes" class="form-select">
+                            </select>
+                            <span asp-validation-for="FollowUpType"></span>
+                        </div>
+
+                        <!-- Target Entities -->
+                        <div class="col-md-4">
+                            <label asp-for="CustomerId" class="form-label fw-semibold small">Link Customer (Optional)</label>
+                            <select asp-for="CustomerId" asp-items="Model.AvailableCustomers" class="form-select">
+                                <option value="">-- None --</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label asp-for="LeadId" class="form-label fw-semibold small">Link Lead (Optional)</label>
+                            <select asp-for="LeadId" asp-items="Model.AvailableLeads" class="form-select">
+                                <option value="">-- None --</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label asp-for="OpportunityId" class="form-label fw-semibold small">Link Opportunity (Optional)</label>
+                            <select asp-for="OpportunityId" asp-items="Model.AvailableOpportunities" class="form-select">
+                                <option value="">-- None --</option>
+                            </select>
+                        </div>
+
+                        @if (Model.AvailableUsers.Any())
+                        {
+                            <div class="col-md-6">
+                                <label asp-for="AssignedTo" class="form-label fw-semibold small">Assign Sales Rep</label>
+                                <select asp-for="AssignedTo" asp-items="Model.AvailableUsers" class="form-select">
+                                    <option value="">-- Assign to Me --</option>
+                                </select>
+                            </div>
+                        }
+
+                        <div class="col-12">
+                            <label asp-for="Remarks" class="form-label fw-semibold small">Agenda & Preparation Notes</label>
+                            <textarea asp-for="Remarks" class="form-control" rows="3" placeholder="Meeting agenda items, materials to present..."></textarea>
+                            <span asp-validation-for="Remarks"></span>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-2 mt-4 pt-2 border-top">
+                        <a asp-action="Index" class="btn btn-outline-secondary">Cancel</a>
+                        <button type="submit" class="btn btn-warning text-dark px-4 fw-semibold shadow-sm">
+                            <i class="bi bi-calendar-check me-1"></i> Schedule Follow-Up
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

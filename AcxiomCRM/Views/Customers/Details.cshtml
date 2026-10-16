@@ -1,0 +1,285 @@
+@model AcxiomCRM.ViewModels.CustomerDetailsViewModel
+@{
+    ViewData["Title"] = $"{Model.Customer.CustomerName} - Customer Details";
+}
+
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
+    <div>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-1 small">
+                <li class="breadcrumb-item"><a asp-action="Index">Customers</a></li>
+                <li class="breadcrumb-item active" aria-current="page">@Model.Customer.CustomerCode</li>
+            </ol>
+        </nav>
+        <h3 class="fw-bold mb-0">
+            @Model.Customer.CustomerName
+            <span class="badge @(Model.Customer.Status == "Active" ? "bg-success" : "bg-secondary") fs-6 ms-2">
+                @Model.Customer.Status
+            </span>
+        </h3>
+    </div>
+    <div class="d-flex gap-2 mt-2 mt-md-0">
+        <a asp-action="Edit" asp-route-id="@Model.Customer.CustomerId" class="btn btn-outline-primary btn-sm">
+            <i class="bi bi-pencil me-1"></i> Edit Customer
+        </a>
+        <a asp-controller="Opportunities" asp-action="Create" asp-route-customerId="@Model.Customer.CustomerId" class="btn btn-success btn-sm">
+            <i class="bi bi-plus-lg me-1"></i> New Opportunity
+        </a>
+        <a asp-controller="FollowUps" asp-action="Create" asp-route-customerId="@Model.Customer.CustomerId" class="btn btn-warning text-dark btn-sm">
+            <i class="bi bi-calendar-plus me-1"></i> Schedule Follow-Up
+        </a>
+        <a asp-controller="Activities" asp-action="Create" asp-route-customerId="@Model.Customer.CustomerId" class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-clock-history me-1"></i> Log Activity
+        </a>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Customer Profile Master Card -->
+    <div class="col-lg-4">
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-white py-3 border-0">
+                <h6 class="fw-bold mb-0"><i class="bi bi-building text-primary me-2"></i> Account Information</h6>
+            </div>
+            <div class="card-body pt-0">
+                <ul class="list-group list-group-flush small">
+                    <li class="list-group-item d-flex justify-content-between px-0">
+                        <span class="text-muted">Customer Code:</span>
+                        <span class="fw-monospace fw-bold">@Model.Customer.CustomerCode</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between px-0">
+                        <span class="text-muted">Company:</span>
+                        <span class="fw-semibold">@(Model.Customer.CompanyName ?? "—")</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between px-0">
+                        <span class="text-muted">Email:</span>
+                        <span><a href="mailto:@Model.Customer.Email" class="text-decoration-none">@Model.Customer.Email</a></span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between px-0">
+                        <span class="text-muted">Phone:</span>
+                        <span>@Model.Customer.Phone</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between px-0">
+                        <span class="text-muted">Address:</span>
+                        <span>@(Model.Customer.Address ?? "—")</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between px-0">
+                        <span class="text-muted">City / State:</span>
+                        <span>@(Model.Customer.City ?? "—"), @(Model.Customer.State ?? "—")</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between px-0">
+                        <span class="text-muted">Assigned Owner:</span>
+                        <span class="badge bg-light text-dark border">@(Model.Customer.Owner?.FullName ?? "Unassigned")</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between px-0">
+                        <span class="text-muted">Created By:</span>
+                        <span>@Model.Customer.CreatedBy</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between px-0">
+                        <span class="text-muted">Created On:</span>
+                        <span>@Model.Customer.CreatedDate.ToString("yyyy-MM-dd HH:mm")</span>
+                    </li>
+                    @if (Model.Customer.ModifiedDate.HasValue)
+                    {
+                        <li class="list-group-item d-flex justify-content-between px-0">
+                            <span class="text-muted">Last Modified:</span>
+                            <span>@Model.Customer.ModifiedDate.Value.ToString("yyyy-MM-dd HH:mm")</span>
+                        </li>
+                    }
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Related CRM Records Tabs -->
+    <div class="col-lg-8">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-white border-0 pt-3">
+                <ul class="nav nav-tabs card-header-tabs" id="customerTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active fw-semibold" id="opps-tab" data-bs-toggle="tab" data-bs-target="#opps" type="button" role="tab">
+                            Opportunities (@Model.Opportunities.Count)
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link fw-semibold" id="followups-tab" data-bs-toggle="tab" data-bs-target="#followups" type="button" role="tab">
+                            Follow-Ups (@Model.FollowUps.Count)
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link fw-semibold" id="activities-tab" data-bs-toggle="tab" data-bs-target="#activities" type="button" role="tab">
+                            Activities (@Model.Activities.Count)
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link fw-semibold" id="leads-tab" data-bs-toggle="tab" data-bs-target="#leads" type="button" role="tab">
+                            Converted Leads (@Model.ConvertedLeads.Count)
+                        </button>
+                    </li>
+                </ul>
+            </div>
+            <div class="card-body tab-content p-0" id="customerTabsContent">
+                <!-- Opportunities Tab -->
+                <div class="tab-pane fade show active" id="opps" role="tabpanel">
+                    @if (Model.Opportunities.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="table-light small">
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Stage</th>
+                                        <th>Amount</th>
+                                        <th>Probability</th>
+                                        <th>Expected Close</th>
+                                        <th>Owner</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var opp in Model.Opportunities)
+                                    {
+                                        <tr>
+                                            <td>
+                                                <a asp-controller="Opportunities" asp-action="Details" asp-route-id="@opp.OpportunityId" class="fw-bold text-decoration-none">
+                                                    @opp.OpportunityName
+                                                </a>
+                                            </td>
+                                            <td><span class="badge bg-secondary">@opp.Stage</span></td>
+                                            <td class="fw-semibold text-success">$@opp.Amount.ToString("N2")</td>
+                                            <td>@opp.Probability%</td>
+                                            <td class="small text-muted">@opp.ExpectedCloseDate.ToString("yyyy-MM-dd")</td>
+                                            <td class="small">@(opp.AssignedUser?.FullName ?? "—")</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="p-4 text-center text-muted">
+                            <i class="bi bi-cash-stack display-6 d-block mb-2 text-muted"></i>
+                            No opportunities linked to this customer yet.
+                        </div>
+                    }
+                </div>
+
+                <!-- Follow-Ups Tab -->
+                <div class="tab-pane fade" id="followups" role="tabpanel">
+                    @if (Model.FollowUps.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="table-light small">
+                                    <tr>
+                                        <th>Subject</th>
+                                        <th>Type</th>
+                                        <th>Date</th>
+                                        <th>Status</th>
+                                        <th>Assigned To</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var f in Model.FollowUps)
+                                    {
+                                        <tr>
+                                            <td class="fw-semibold">@f.Subject</td>
+                                            <td><span class="badge bg-light text-dark border">@f.FollowUpType</span></td>
+                                            <td class="small">@f.FollowUpDate.ToString("yyyy-MM-dd HH:mm")</td>
+                                            <td>
+                                                <span class="badge @(f.Status == "Completed" ? "bg-success" : f.Status == "Planned" ? "bg-primary" : "bg-warning text-dark")">
+                                                    @f.Status
+                                                </span>
+                                            </td>
+                                            <td class="small">@(f.AssignedUser?.FullName ?? "—")</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="p-4 text-center text-muted">
+                            No follow-ups recorded for this customer.
+                        </div>
+                    }
+                </div>
+
+                <!-- Activities Tab -->
+                <div class="tab-pane fade" id="activities" role="tabpanel">
+                    @if (Model.Activities.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="table-light small">
+                                    <tr>
+                                        <th>Type</th>
+                                        <th>Subject</th>
+                                        <th>Date</th>
+                                        <th>Assigned To</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var a in Model.Activities)
+                                    {
+                                        <tr>
+                                            <td><span class="badge bg-info text-dark">@a.ActivityType</span></td>
+                                            <td class="small fw-semibold">@a.Subject</td>
+                                            <td class="small text-muted">@a.ActivityDate.ToString("yyyy-MM-dd HH:mm")</td>
+                                            <td class="small">@(a.AssignedUser?.FullName ?? "—")</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="p-4 text-center text-muted">
+                            No touchpoint activities recorded.
+                        </div>
+                    }
+                </div>
+
+                <!-- Converted Leads Tab -->
+                <div class="tab-pane fade" id="leads" role="tabpanel">
+                    @if (Model.ConvertedLeads.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="table-light small">
+                                    <tr>
+                                        <th>Lead Code</th>
+                                        <th>Lead Name</th>
+                                        <th>Source</th>
+                                        <th>Converted On</th>
+                                        <th>Assigned To</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var l in Model.ConvertedLeads)
+                                    {
+                                        <tr>
+                                            <td class="fw-monospace">@l.LeadCode</td>
+                                            <td class="fw-semibold">@l.LeadName</td>
+                                            <td>@l.Source</td>
+                                            <td class="small text-muted">@l.ConversionDate?.ToString("yyyy-MM-dd")</td>
+                                            <td class="small">@(l.AssignedUser?.FullName ?? "—")</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="p-4 text-center text-muted">
+                            This customer was created directly (not from a converted lead).
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

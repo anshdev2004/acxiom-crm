@@ -1,0 +1,125 @@
+@model AcxiomCRM.ViewModels.LeadConvertViewModel
+@{
+    ViewData["Title"] = $"Convert Lead - {Model.LeadName}";
+}
+
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-2 small">
+                <li class="breadcrumb-item"><a asp-action="Index">Leads</a></li>
+                <li class="breadcrumb-item"><a asp-action="Details" asp-route-id="@Model.LeadId">@Model.LeadCode</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Convert</li>
+            </ol>
+        </nav>
+
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-white py-3 border-0">
+                <h4 class="fw-bold mb-0 text-success"><i class="bi bi-arrow-repeat me-2"></i> Convert Lead to Customer & Opportunity</h4>
+                <span class="text-muted small">Executes an atomic database transaction to promote prospect to an active CRM customer</span>
+            </div>
+            <div class="card-body p-4 pt-2">
+                <!-- Summary of Lead Being Converted -->
+                <div class="card bg-light border-0 mb-4 p-3 rounded-3">
+                    <h6 class="fw-bold mb-2 text-dark"><i class="bi bi-info-circle me-1 text-primary"></i> Prospect Information</h6>
+                    <div class="row g-2 small">
+                        <div class="col-md-6"><strong>Lead Code:</strong> <span class="fw-monospace">@Model.LeadCode</span></div>
+                        <div class="col-md-6"><strong>Lead Name:</strong> @Model.LeadName</div>
+                        <div class="col-md-6"><strong>Email:</strong> @Model.Email</div>
+                        <div class="col-md-6"><strong>Phone:</strong> @Model.Phone</div>
+                        <div class="col-md-12"><strong>Company:</strong> @(Model.CompanyName ?? "Individual")</div>
+                    </div>
+                </div>
+
+                @if (Model.ExistingCustomerFound)
+                {
+                    <div class="alert alert-warning d-flex align-items-center mb-4">
+                        <i class="bi bi-exclamation-triangle-fill fs-4 me-3 text-warning"></i>
+                        <div>
+                            <strong>Existing Matching Customer Detected:</strong><br />
+                            A customer record matching this email or phone was found: <strong>@Model.ExistingCustomerName</strong>.
+                            Converting will link this lead to the existing customer without creating duplicate customer master records.
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <div class="alert alert-success d-flex align-items-center mb-4">
+                        <i class="bi bi-check-circle-fill fs-4 me-3 text-success"></i>
+                        <div>
+                            <strong>New Customer Creation:</strong><br />
+                            No matching customer was found. A new master customer record with an auto-generated <strong>CUST-XXXX</strong> code will be created.
+                        </div>
+                    </div>
+                }
+
+                <form asp-action="Convert" method="post" novalidate>
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" asp-for="LeadId" />
+                    <input type="hidden" asp-for="LeadCode" />
+                    <input type="hidden" asp-for="LeadName" />
+                    <input type="hidden" asp-for="Email" />
+                    <input type="hidden" asp-for="Phone" />
+                    <input type="hidden" asp-for="CompanyName" />
+                    <input type="hidden" asp-for="ExistingCustomerFound" />
+                    <input type="hidden" asp-for="ExistingCustomerId" />
+                    <input type="hidden" asp-for="ExistingCustomerName" />
+
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2 small" role="alert"></div>
+
+                    <!-- Opportunity Generation Option -->
+                    <div class="card border mb-4">
+                        <div class="card-header bg-white py-2">
+                            <div class="form-check form-switch mb-0">
+                                <input asp-for="CreateOpportunity" class="form-check-input" id="toggleOpportunity" />
+                                <label asp-for="CreateOpportunity" class="form-check-label fw-bold small text-primary">
+                                    Simultaneously Create an Initial Sales Opportunity
+                                </label>
+                            </div>
+                        </div>
+                        <div class="card-body" id="opportunityFields">
+                            <div class="row g-3">
+                                <div class="col-12">
+                                    <label asp-for="OpportunityName" class="form-label fw-semibold small">Opportunity Name <span class="text-danger">*</span></label>
+                                    <input asp-for="OpportunityName" class="form-control" />
+                                    <span asp-validation-for="OpportunityName"></span>
+                                </div>
+                                <div class="col-md-6">
+                                    <label asp-for="OpportunityAmount" class="form-label fw-semibold small">Opportunity Amount ($) <span class="text-danger">*</span></label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">$</span>
+                                        <input asp-for="OpportunityAmount" class="form-control" type="number" step="0.01" min="0.01" />
+                                    </div>
+                                    <span asp-validation-for="OpportunityAmount"></span>
+                                    <div class="form-text small">Mandatory: Amount must be greater than 0.</div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label asp-for="ExpectedCloseDate" class="form-label fw-semibold small">Expected Close Date <span class="text-danger">*</span></label>
+                                    <input asp-for="ExpectedCloseDate" class="form-control" type="date" />
+                                    <span asp-validation-for="ExpectedCloseDate"></span>
+                                    <div class="form-text small">Mandatory: Cannot be in the past for active deals.</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-2 pt-2 border-top">
+                        <a asp-action="Details" asp-route-id="@Model.LeadId" class="btn btn-outline-secondary">Cancel</a>
+                        <button type="submit" class="btn btn-success px-4 fw-semibold shadow-sm">
+                            <i class="bi bi-arrow-repeat me-1"></i> Execute Conversion
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        document.getElementById('toggleOpportunity').addEventListener('change', function () {
+            document.getElementById('opportunityFields').style.display = this.checked ? 'block' : 'none';
+        });
+    </script>
+}

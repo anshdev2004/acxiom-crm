@@ -1,0 +1,388 @@
+@model AcxiomCRM.ViewModels.ReportContainerViewModel
+@{
+    ViewData["Title"] = "CRM Analytics & Reports";
+}
+
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
+    <div>
+        <h3 class="fw-bold mb-1"><i class="bi bi-bar-chart-line-fill text-primary me-2"></i> CRM Reports & Intelligence</h3>
+        <p class="text-muted small mb-0">Role-scoped reports with multi-criteria filtering and CSV data export</p>
+    </div>
+    <div>
+        <a asp-action="ExportCsv"
+           asp-route-reportType="@Model.Filter.ReportType"
+           asp-route-startDate="@(Model.Filter.StartDate?.ToString("yyyy-MM-dd"))"
+           asp-route-endDate="@(Model.Filter.EndDate?.ToString("yyyy-MM-dd"))"
+           asp-route-ownerId="@Model.Filter.OwnerId"
+           asp-route-status="@Model.Filter.Status"
+           asp-route-stage="@Model.Filter.Stage"
+           class="btn btn-outline-success shadow-sm fw-semibold">
+            <i class="bi bi-file-earmark-spreadsheet me-1"></i> Export to CSV
+        </a>
+    </div>
+</div>
+
+<!-- Report Type Selection Pills -->
+<div class="nav nav-pills flex-wrap gap-2 mb-4">
+    <a asp-action="Index" asp-route-reportType="Pipeline" class="nav-link @(Model.Filter.ReportType == "Pipeline" ? "active" : "bg-white border text-dark")">
+        <i class="bi bi-wallet2 me-1"></i> Pipeline Report
+    </a>
+    <a asp-action="Index" asp-route-reportType="Customer" class="nav-link @(Model.Filter.ReportType == "Customer" ? "active" : "bg-white border text-dark")">
+        <i class="bi bi-people me-1"></i> Customer Report
+    </a>
+    <a asp-action="Index" asp-route-reportType="Lead" class="nav-link @(Model.Filter.ReportType == "Lead" ? "active" : "bg-white border text-dark")">
+        <i class="bi bi-funnel me-1"></i> Lead Report
+    </a>
+    <a asp-action="Index" asp-route-reportType="Opportunity" class="nav-link @(Model.Filter.ReportType == "Opportunity" ? "active" : "bg-white border text-dark")">
+        <i class="bi bi-cash-stack me-1"></i> Opportunity Report
+    </a>
+    <a asp-action="Index" asp-route-reportType="FollowUp" class="nav-link @(Model.Filter.ReportType == "FollowUp" ? "active" : "bg-white border text-dark")">
+        <i class="bi bi-calendar-event me-1"></i> Follow-Up Report
+    </a>
+    <a asp-action="Index" asp-route-reportType="Conversion" class="nav-link @(Model.Filter.ReportType == "Conversion" ? "active" : "bg-white border text-dark")">
+        <i class="bi bi-arrow-repeat me-1"></i> Conversion Report
+    </a>
+    <a asp-action="Index" asp-route-reportType="UserActivity" class="nav-link @(Model.Filter.ReportType == "UserActivity" ? "active" : "bg-white border text-dark")">
+        <i class="bi bi-activity me-1"></i> User Activity Report
+    </a>
+    @if (User.IsInRole(RoleConstants.Admin))
+    {
+        <a asp-action="Index" asp-route-reportType="Audit" class="nav-link @(Model.Filter.ReportType == "Audit" ? "active bg-danger" : "bg-white border text-danger")">
+            <i class="bi bi-journal-text me-1"></i> Audit Trail Report
+        </a>
+    }
+</div>
+
+<!-- Filter Form -->
+<div class="card shadow-sm border-0 mb-4">
+    <div class="card-body p-3">
+        <form method="get" class="row g-2 align-items-end">
+            <input type="hidden" name="reportType" value="@Model.Filter.ReportType" />
+
+            <div class="col-md-3">
+                <label class="form-label small fw-semibold">Start Date</label>
+                <input type="date" name="startDate" value="@(Model.Filter.StartDate?.ToString("yyyy-MM-dd"))" class="form-control form-control-sm" />
+            </div>
+            <div class="col-md-3">
+                <label class="form-label small fw-semibold">End Date</label>
+                <input type="date" name="endDate" value="@(Model.Filter.EndDate?.ToString("yyyy-MM-dd"))" class="form-control form-control-sm" />
+            </div>
+
+            @if (Model.Filter.AvailableUsers.Any())
+            {
+                <div class="col-md-3">
+                    <label class="form-label small fw-semibold">User / Rep</label>
+                    <select name="ownerId" class="form-select form-select-sm">
+                        <option value="">All Users</option>
+                        @foreach (var user in Model.Filter.AvailableUsers)
+                        {
+                            <option value="@user.Value" selected="@(Model.Filter.OwnerId == user.Value)">@user.Text</option>
+                        }
+                    </select>
+                </div>
+            }
+
+            @if (Model.Filter.ReportType is "Opportunity" or "Pipeline")
+            {
+                <div class="col-md-2">
+                    <label class="form-label small fw-semibold">Stage</label>
+                    <select name="stage" class="form-select form-select-sm">
+                        <option value="">All Stages</option>
+                        @foreach (var stg in Model.Filter.AvailableStages)
+                        {
+                            <option value="@stg.Value" selected="@(Model.Filter.Stage == stg.Value)">@stg.Text</option>
+                        }
+                    </select>
+                </div>
+            }
+
+            <div class="col-md-1 d-flex gap-1">
+                <button type="submit" class="btn btn-sm btn-primary w-100">Run</button>
+                <a asp-action="Index" asp-route-reportType="@Model.Filter.ReportType" class="btn btn-sm btn-outline-secondary"><i class="bi bi-arrow-counterclockwise"></i></a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Report Output Container -->
+<div class="card shadow-sm border-0">
+    <!-- Pipeline / Opportunity Report Output -->
+    @if (Model.Filter.ReportType is "Pipeline" or "Opportunity")
+    {
+        <div class="card-header bg-white py-3 border-0 d-flex justify-content-between align-items-center">
+            <div>
+                <h5 class="fw-bold mb-0">Pipeline Financial Analysis</h5>
+                <span class="text-muted small">Total Open Deals: @Model.Opportunities.Count</span>
+            </div>
+            <div class="text-end">
+                <span class="text-muted small me-3">Total Value: <strong class="text-dark fs-6">$@Model.TotalAmount.ToString("N2")</strong></span>
+                <span class="text-muted small">Weighted Forecast: <strong class="text-primary fs-6">$@Model.TotalWeightedAmount.ToString("N2")</strong></span>
+            </div>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light small">
+                        <tr>
+                            <th>Deal Name</th>
+                            <th>Customer</th>
+                            <th>Stage</th>
+                            <th>Amount</th>
+                            <th>Probability</th>
+                            <th>Weighted Value</th>
+                            <th>Close Date</th>
+                            <th>Rep</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var opp in Model.Opportunities)
+                        {
+                            <tr>
+                                <td class="fw-bold">@opp.OpportunityName</td>
+                                <td>@(opp.Customer?.CustomerName ?? "—")</td>
+                                <td><span class="badge bg-secondary">@opp.Stage</span></td>
+                                <td class="fw-semibold text-dark">$@opp.Amount.ToString("N2")</td>
+                                <td>@opp.Probability%</td>
+                                <td class="text-primary fw-semibold">$@opp.WeightedAmount.ToString("N2")</td>
+                                <td class="small text-muted">@opp.ExpectedCloseDate.ToString("yyyy-MM-dd")</td>
+                                <td class="small">@(opp.AssignedUser?.FullName ?? "—")</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+    else if (Model.Filter.ReportType == "Customer")
+    {
+        <div class="card-header bg-white py-3 border-0">
+            <h5 class="fw-bold mb-0">Customer Master Report (@Model.Customers.Count records)</h5>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light small">
+                        <tr>
+                            <th>Customer Code</th>
+                            <th>Customer Name</th>
+                            <th>Email</th>
+                            <th>Phone</th>
+                            <th>Company</th>
+                            <th>City / State</th>
+                            <th>Status</th>
+                            <th>Rep</th>
+                            <th>Created</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var c in Model.Customers)
+                        {
+                            <tr>
+                                <td class="fw-monospace">@c.CustomerCode</td>
+                                <td class="fw-bold">@c.CustomerName</td>
+                                <td>@c.Email</td>
+                                <td>@c.Phone</td>
+                                <td>@(c.CompanyName ?? "—")</td>
+                                <td>@(c.City ?? "—"), @(c.State ?? "—")</td>
+                                <td><span class="badge bg-success">@c.Status</span></td>
+                                <td>@(c.Owner?.FullName ?? "—")</td>
+                                <td class="small text-muted">@c.CreatedDate.ToString("yyyy-MM-dd")</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+    else if (Model.Filter.ReportType == "Lead")
+    {
+        <div class="card-header bg-white py-3 border-0">
+            <h5 class="fw-bold mb-0">Lead Acquisition Report (@Model.Leads.Count records)</h5>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light small">
+                        <tr>
+                            <th>Lead Code</th>
+                            <th>Name</th>
+                            <th>Email & Phone</th>
+                            <th>Source</th>
+                            <th>Status</th>
+                            <th>Priority</th>
+                            <th>Expected Value</th>
+                            <th>Rep</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var l in Model.Leads)
+                        {
+                            <tr>
+                                <td class="fw-monospace">@l.LeadCode</td>
+                                <td class="fw-bold">@l.LeadName</td>
+                                <td>@l.Email &bull; @l.Phone</td>
+                                <td>@l.Source</td>
+                                <td><span class="badge bg-primary">@l.Status</span></td>
+                                <td>@l.Priority</td>
+                                <td class="fw-semibold text-success">$@l.ExpectedValue.ToString("N2")</td>
+                                <td>@(l.AssignedUser?.FullName ?? "—")</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+    else if (Model.Filter.ReportType == "FollowUp")
+    {
+        <div class="card-header bg-white py-3 border-0">
+            <h5 class="fw-bold mb-0">Follow-Up Commitments Report (@Model.FollowUps.Count records)</h5>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light small">
+                        <tr>
+                            <th>Subject</th>
+                            <th>Date & Time</th>
+                            <th>Type</th>
+                            <th>Status</th>
+                            <th>Target Contact</th>
+                            <th>Rep</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var f in Model.FollowUps)
+                        {
+                            <tr>
+                                <td class="fw-semibold">@f.Subject</td>
+                                <td class="small">@f.FollowUpDate.ToString("yyyy-MM-dd HH:mm")</td>
+                                <td><span class="badge bg-light text-dark border">@f.FollowUpType</span></td>
+                                <td><span class="badge bg-secondary">@f.Status</span></td>
+                                <td>@(f.Customer?.CustomerName ?? f.Lead?.LeadName ?? "—")</td>
+                                <td>@(f.AssignedUser?.FullName ?? "—")</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+    else if (Model.Filter.ReportType == "Conversion")
+    {
+        <div class="card-header bg-white py-3 border-0">
+            <div class="row text-center g-3">
+                <div class="col-md-4">
+                    <div class="p-3 bg-light rounded">
+                        <span class="text-muted small">Total Captured Leads</span>
+                        <h3 class="fw-bold mb-0">@Model.TotalLeadsCount</h3>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="p-3 bg-light rounded">
+                        <span class="text-muted small">Converted Customers</span>
+                        <h3 class="fw-bold mb-0 text-success">@Model.ConvertedLeadsCount</h3>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="p-3 bg-light rounded">
+                        <span class="text-muted small">Conversion Rate</span>
+                        <h3 class="fw-bold mb-0 text-primary">@Model.ConversionRate%</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light small">
+                        <tr>
+                            <th>Lead Code</th>
+                            <th>Lead Name</th>
+                            <th>Email</th>
+                            <th>Status</th>
+                            <th>Conversion Date</th>
+                            <th>Rep</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var l in Model.Leads)
+                        {
+                            <tr>
+                                <td class="fw-monospace">@l.LeadCode</td>
+                                <td class="fw-bold">@l.LeadName</td>
+                                <td>@l.Email</td>
+                                <td>
+                                    <span class="badge @(l.Status == "Converted" ? "bg-success" : "bg-secondary")">
+                                        @l.Status
+                                    </span>
+                                </td>
+                                <td>@(l.ConversionDate?.ToString("yyyy-MM-dd") ?? "—")</td>
+                                <td>@(l.AssignedUser?.FullName ?? "—")</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+    else if (Model.Filter.ReportType == "UserActivity")
+    {
+        <div class="card-header bg-white py-3 border-0">
+            <h5 class="fw-bold mb-0">User CRM Activity Metrics</h5>
+        </div>
+        <div class="card-body">
+            <div class="row g-3">
+                @foreach (var kvp in Model.UserActivityCounts)
+                {
+                    <div class="col-md-4">
+                        <div class="card bg-light border-0 p-3">
+                            <span class="text-muted small">User / Sales Rep</span>
+                            <h5 class="fw-bold mb-1">@kvp.Key</h5>
+                            <span class="text-primary fw-bold fs-4">@kvp.Value Activities Logged</span>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+    else if (Model.Filter.ReportType == "Audit")
+    {
+        <div class="card-header bg-white py-3 border-0">
+            <h5 class="fw-bold mb-0 text-danger"><i class="bi bi-shield-lock me-1"></i> Security & Audit Trail Events</h5>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light small">
+                        <tr>
+                            <th>Timestamp</th>
+                            <th>User</th>
+                            <th>Action</th>
+                            <th>Entity</th>
+                            <th>Record ID</th>
+                            <th>Result</th>
+                            <th>IP Address</th>
+                            <th>Details</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var a in Model.AuditLogs)
+                        {
+                            <tr>
+                                <td class="small text-muted">@a.CreatedDate.ToString("yyyy-MM-dd HH:mm:ss")</td>
+                                <td class="small fw-semibold">@(a.UserEmail ?? "Anonymous")</td>
+                                <td><span class="badge bg-secondary">@a.Action</span></td>
+                                <td>@a.EntityName</td>
+                                <td class="fw-monospace small">@(a.RecordId ?? "—")</td>
+                                <td><span class="badge @(a.Result == "Success" ? "bg-success" : "bg-danger")">@a.Result</span></td>
+                                <td class="small text-muted">@(a.IpAddress ?? "—")</td>
+                                <td class="small text-muted" style="max-width: 300px;">@a.Details</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+</div>

@@ -1,0 +1,80 @@
+@model AcxiomCRM.ViewModels.RegisterViewModel
+@{
+    ViewData["Title"] = "Register Sales Account";
+}
+
+<div class="row justify-content-center mt-3">
+    <div class="col-md-6 col-lg-5">
+        <div class="card shadow-sm border-0 rounded-3">
+            <div class="card-body p-4">
+                <div class="text-center mb-3">
+                    <i class="bi bi-person-plus-fill text-primary display-5"></i>
+                    <h3 class="fw-bold mt-2">Join Acxiom<span class="text-primary">CRM</span></h3>
+                    <p class="text-muted small">Create your frontline Sales Executive account</p>
+                </div>
+
+                <div class="alert alert-info py-2 small d-flex align-items-center mb-3">
+                    <i class="bi bi-shield-check fs-5 me-2"></i>
+                    <span><strong>Security Note:</strong> Public registration automatically assigns the <em>SalesExecutive</em> role server-side. Privileged roles (Manager, Admin) are granted only by system administrators.</span>
+                </div>
+
+                <form asp-controller="Account" asp-action="Register" method="post" novalidate>
+                    @Html.AntiForgeryToken()
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2 small" role="alert"></div>
+
+                    <div class="mb-3">
+                        <label asp-for="FullName" class="form-label fw-semibold small">Full Name <span class="text-danger">*</span></label>
+                        <input asp-for="FullName" class="form-control" placeholder="John Doe" autofocus />
+                        <span asp-validation-for="FullName"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Email" class="form-label fw-semibold small">Work Email <span class="text-danger">*</span></label>
+                        <input asp-for="Email" class="form-control" placeholder="john.doe@company.com" autocomplete="username" />
+                        <span asp-validation-for="Email"></span>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="PhoneNumber" class="form-label fw-semibold small">Phone Number <span class="text-danger">*</span></label>
+                            <input asp-for="PhoneNumber" class="form-control" placeholder="+1-555-0199" />
+                            <span asp-validation-for="PhoneNumber"></span>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="Department" class="form-label fw-semibold small">Department</label>
+                            <input asp-for="Department" class="form-control" placeholder="Field Sales" />
+                            <span asp-validation-for="Department"></span>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Password" class="form-label fw-semibold small">Password <span class="text-danger">*</span></label>
+                        <input asp-for="Password" class="form-control" type="password" placeholder="At least 8 chars, 1 uppercase, 1 digit, 1 special" autocomplete="new-password" />
+                        <span asp-validation-for="Password"></span>
+                        <div class="form-text small">Must contain at least 8 characters, upper/lower letters, digit, and special symbol.</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="ConfirmPassword" class="form-label fw-semibold small">Confirm Password <span class="text-danger">*</span></label>
+                        <input asp-for="ConfirmPassword" class="form-control" type="password" placeholder="Repeat your password" autocomplete="new-password" />
+                        <span asp-validation-for="ConfirmPassword"></span>
+                    </div>
+
+                    <div class="d-grid mt-4 mb-3">
+                        <button type="submit" class="btn btn-primary py-2 fw-semibold">
+                            <i class="bi bi-check-circle me-1"></i> Complete Registration
+                        </button>
+                    </div>
+                </form>
+
+                <div class="text-center text-muted small">
+                    Already registered? <a asp-controller="Account" asp-action="Login" class="text-decoration-none fw-semibold">Sign in here</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

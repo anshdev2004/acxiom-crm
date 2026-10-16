@@ -1,0 +1,118 @@
+@model AcxiomCRM.ViewModels.CustomerEditViewModel
+@{
+    ViewData["Title"] = $"Edit Customer - {Model.CustomerName}";
+}
+
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-2 small">
+                <li class="breadcrumb-item"><a asp-action="Index">Customers</a></li>
+                <li class="breadcrumb-item"><a asp-action="Details" asp-route-id="@Model.CustomerId">@Model.CustomerCode</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Edit</li>
+            </ol>
+        </nav>
+
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-white py-3 border-0 d-flex justify-content-between align-items-center">
+                <div>
+                    <h4 class="fw-bold mb-0"><i class="bi bi-pencil-square text-primary me-2"></i> Edit Customer</h4>
+                    <span class="text-muted small">Update master customer profile: <strong>@Model.CustomerCode</strong></span>
+                </div>
+                <span class="badge bg-light text-dark border">@Model.CustomerCode</span>
+            </div>
+            <div class="card-body p-4 pt-2">
+                <form asp-action="Edit" asp-route-id="@Model.CustomerId" method="post" novalidate>
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" asp-for="CustomerId" />
+                    <input type="hidden" asp-for="CustomerCode" />
+
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2 small" role="alert"></div>
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label asp-for="CustomerName" class="form-label fw-semibold small">Customer Name <span class="text-danger">*</span></label>
+                            <input asp-for="CustomerName" class="form-control" />
+                            <span asp-validation-for="CustomerName"></span>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label asp-for="CompanyName" class="form-label fw-semibold small">Company Name</label>
+                            <input asp-for="CompanyName" class="form-control" />
+                            <span asp-validation-for="CompanyName"></span>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label asp-for="Email" class="form-label fw-semibold small">Email Address <span class="text-danger">*</span></label>
+                            <input asp-for="Email" class="form-control" />
+                            <span asp-validation-for="Email"></span>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label asp-for="Phone" class="form-label fw-semibold small">Phone Number <span class="text-danger">*</span></label>
+                            <input asp-for="Phone" class="form-control" />
+                            <span asp-validation-for="Phone"></span>
+                        </div>
+
+                        <div class="col-12">
+                            <label asp-for="Address" class="form-label fw-semibold small">Street Address</label>
+                            <input asp-for="Address" class="form-control" />
+                            <span asp-validation-for="Address"></span>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label asp-for="City" class="form-label fw-semibold small">City</label>
+                            <input asp-for="City" class="form-control" />
+                            <span asp-validation-for="City"></span>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label asp-for="State" class="form-label fw-semibold small">State / Province</label>
+                            <input asp-for="State" class="form-control" />
+                            <span asp-validation-for="State"></span>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label asp-for="Status" class="form-label fw-semibold small">Customer Status</label>
+                            <select asp-for="Status" class="form-select">
+                                <option value="Active">Active</option>
+                                <option value="Inactive">Inactive</option>
+                            </select>
+                            <span asp-validation-for="Status"></span>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label asp-for="IsActive" class="form-label fw-semibold small">Active Record</label>
+                            <select asp-for="IsActive" class="form-select">
+                                <option value="true">Active (Enabled)</option>
+                                <option value="false">Archived / Deactivated</option>
+                            </select>
+                        </div>
+
+                        @if (Model.AvailableOwners.Any())
+                        {
+                            <div class="col-md-4">
+                                <label asp-for="OwnerId" class="form-label fw-semibold small">Assigned Rep</label>
+                                <select asp-for="OwnerId" asp-items="Model.AvailableOwners" class="form-select">
+                                    <option value="">-- Keep Current --</option>
+                                </select>
+                                <span asp-validation-for="OwnerId"></span>
+                            </div>
+                        }
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-2 mt-4 pt-2 border-top">
+                        <a asp-action="Details" asp-route-id="@Model.CustomerId" class="btn btn-outline-secondary">Cancel</a>
+                        <button type="submit" class="btn btn-primary px-4 fw-semibold">
+                            <i class="bi bi-check-lg me-1"></i> Update Customer
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

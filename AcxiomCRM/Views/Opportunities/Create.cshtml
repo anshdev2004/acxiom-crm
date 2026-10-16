@@ -1,0 +1,129 @@
+@model AcxiomCRM.ViewModels.OpportunityEditViewModel
+@{
+    ViewData["Title"] = "Create Sales Opportunity";
+}
+
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-2 small">
+                <li class="breadcrumb-item"><a asp-action="Index">Opportunities</a></li>
+                <li class="breadcrumb-item active" aria-current="page">New Opportunity</li>
+            </ol>
+        </nav>
+
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-white py-3 border-0">
+                <h4 class="fw-bold mb-0 text-success"><i class="bi bi-cash-stack me-2"></i> Create Sales Opportunity</h4>
+                <span class="text-muted small">Enter deal parameters, probability forecast, and projected close date</span>
+            </div>
+            <div class="card-body p-4 pt-2">
+                <form asp-action="Create" method="post" novalidate>
+                    @Html.AntiForgeryToken()
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2 small" role="alert"></div>
+
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label asp-for="OpportunityName" class="form-label fw-semibold small">Opportunity Name <span class="text-danger">*</span></label>
+                            <input asp-for="OpportunityName" class="form-control" placeholder="e.g. Enterprise Cloud License - 50 Seats" autofocus />
+                            <span asp-validation-for="OpportunityName"></span>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label asp-for="CustomerId" class="form-label fw-semibold small">Associated Customer <span class="text-danger">*</span></label>
+                            <select asp-for="CustomerId" asp-items="Model.AvailableCustomers" class="form-select">
+                                <option value="">-- Select Customer --</option>
+                            </select>
+                            <span asp-validation-for="CustomerId"></span>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label asp-for="LeadId" class="form-label fw-semibold small">Source Lead (Optional)</label>
+                            <select asp-for="LeadId" asp-items="Model.AvailableLeads" class="form-select">
+                                <option value="">-- Direct Customer Deal (No Lead) --</option>
+                            </select>
+                            <span asp-validation-for="LeadId"></span>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label asp-for="Amount" class="form-label fw-semibold small">Opportunity Amount ($) <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                <input asp-for="Amount" class="form-control" type="number" step="0.01" min="0.01" placeholder="50000.00" />
+                            </div>
+                            <span asp-validation-for="Amount"></span>
+                            <div class="form-text small">Mandatory: Must be greater than 0. No negative amounts.</div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label asp-for="Stage" class="form-label fw-semibold small">Pipeline Stage <span class="text-danger">*</span></label>
+                            <select asp-for="Stage" asp-items="Model.AvailableStages" class="form-select" id="stageSelect">
+                            </select>
+                            <span asp-validation-for="Stage"></span>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label asp-for="Probability" class="form-label fw-semibold small">Probability (%) <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <input asp-for="Probability" class="form-control" type="number" min="0" max="100" id="probInput" />
+                                <span class="input-group-text">%</span>
+                            </div>
+                            <span asp-validation-for="Probability"></span>
+                            <div class="form-text small">Mandatory: Value must be between 0 and 100.</div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label asp-for="ExpectedCloseDate" class="form-label fw-semibold small">Expected Close Date <span class="text-danger">*</span></label>
+                            <input asp-for="ExpectedCloseDate" class="form-control" type="date" />
+                            <span asp-validation-for="ExpectedCloseDate"></span>
+                            <div class="form-text small">Mandatory: Cannot be in the past for active deals.</div>
+                        </div>
+
+                        @if (Model.AvailableUsers.Any())
+                        {
+                            <div class="col-md-6">
+                                <label asp-for="AssignedTo" class="form-label fw-semibold small">Assigned Sales Executive</label>
+                                <select asp-for="AssignedTo" asp-items="Model.AvailableUsers" class="form-select">
+                                    <option value="">-- Assign to Me --</option>
+                                </select>
+                                <span asp-validation-for="AssignedTo"></span>
+                            </div>
+                        }
+
+                        <div class="col-12">
+                            <label asp-for="Notes" class="form-label fw-semibold small">Strategic Notes & Next Steps</label>
+                            <textarea asp-for="Notes" class="form-control" rows="3" placeholder="Key decision makers, competitors, technical criteria..."></textarea>
+                            <span asp-validation-for="Notes"></span>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-2 mt-4 pt-2 border-top">
+                        <a asp-action="Index" class="btn btn-outline-secondary">Cancel</a>
+                        <button type="submit" class="btn btn-success px-4 fw-semibold shadow-sm">
+                            <i class="bi bi-check-lg me-1"></i> Save Opportunity
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        const stageProbabilities = {
+            'Qualification': 20,
+            'Proposal': 50,
+            'Negotiation': 80,
+            'Won': 100,
+            'Lost': 0
+        };
+
+        document.getElementById('stageSelect').addEventListener('change', function () {
+            if (stageProbabilities[this.value] !== undefined) {
+                document.getElementById('probInput').value = stageProbabilities[this.value];
+            }
+        });
+    </script>
+}
